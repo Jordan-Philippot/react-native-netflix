@@ -1,32 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { SafeAreaView, StyleSheet, Text, View, Image } from 'react-native';
+
+// Packages
 import { vw, vh } from 'react-native-expo-viewport-units';
 
-import {
-    useFonts,
-    BebasNeue_400Regular,
-} from "@expo-google-fonts/dev";
-
+// Images
 import NetflixNLogo from '../assets/images/netflixNLogo.png'
 
-export default function ShowItem({ data, navigation }) {
+export default function ShowItem({ show, navigation }) {
 
-    let [fontsLoaded] = useFonts({
-        BebasNeue_400Regular
-    });
     return (
         <SafeAreaView>
             <View style={styles.container}>
                 <Image
-                    source={data.images.show ? data.images.show : NetflixNLogo}
+                    source={show.images.show ? show.images.show : NetflixNLogo}
                     style={styles.image}
                 />
                 <Text style={styles.title}
                     onPress={() => navigation.navigate('Details', {
-                        id: data.id,
+                        id: show.id,
                     })}
                 >
-                    {data.title ? data.title : data.original_title ? data.original_title : "Sans Titre"}
+                    {show.title ? show.title : show.original_title ? show.original_title : "Sans Titre"}
                 </Text>
             </View>
         </SafeAreaView>
@@ -49,7 +44,6 @@ const styles = StyleSheet.create({
         maxWidth: vw(33),
         textAlign: 'center',
         fontWeight: 'bold',
-        fontFamily: BebasNeue_400Regular,
         flexWrap: 'break-word',
     },
     image: {

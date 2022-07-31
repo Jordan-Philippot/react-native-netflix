@@ -5,33 +5,29 @@ import { SafeAreaView, Text, TextInput, View, TouchableHighlight, Image, StyleSh
 import { vw, vh } from 'react-native-expo-viewport-units';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { stringMd5 } from 'react-native-quick-md5';
-// import {
-//     useFonts,
-//     BebasNeue_400Regular,
-// } from "@expo-google-fonts/dev";
 
 // Images
 import NetflixLogo from '../assets/images/netflixLogo.png'
 
 // Services
-import { login } from '../services/auth'
+import { signUp } from '../services/auth'
 
 
-export default function Home({ route, navigation }) {
+export default function SignUpScreen({ navigation }) {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
     const [response, setResponse] = useState([])
+    const [name, setName] = useState("")
 
     const data = {
-        "login": email,
+        "login": name,
+        "email": email,
         "password": stringMd5(password),
     }
-
-
-    const registerToList = () => {
+    const signUpToLogin = () => {
         if (email != "" && email.length > 5 && password != "" && password.length > 2) {
-            login(setResponse, data)
+            signUp(setResponse, data)
         } else if (email.length <= 2) {
             setError("Votre email dois comporter au minimum 5 charactères")
         } else if (email == "") {
@@ -54,13 +50,17 @@ export default function Home({ route, navigation }) {
                 AsyncStorage.setItem('login', response.user.login)
                 AsyncStorage.setItem('token', response.token)
                 AsyncStorage.setItem('hash', response.hash)
-                navigation.navigate('Liste', { login: "success" })
+
+                navigation.navigate('Liste', {
+                    signup: 'success',
+                })
             } catch (e) {
                 setError(e)
             }
         }
     }, [response])
 
+    console.log(response)
     return (
         <SafeAreaView>
             <View style={styles.container}>
@@ -76,17 +76,24 @@ export default function Home({ route, navigation }) {
 
                 <TextInput
                     style={styles.input}
+                    onChangeText={(value) => setName(value)}
+                    value={name}
+                    placeholder="Pseudo"
+                    keyboardType="name"
+                />
+                <TextInput
+                    style={styles.input}
                     onChangeText={(value) => setEmail(value)}
                     value={email}
                     placeholder="Adresse mail"
-                    keyboardType="email-address"
+                    keyboardType="email"
                 />
                 <TextInput
                     style={styles.input}
                     onChangeText={(value) => setPassword(value)}
                     value={password}
                     placeholder="Mot de passe"
-                    keyboardType="visible-password"
+                    keyboardType="password"
                 />
                 {!!error &&
                     <Text style={styles.error}>
@@ -94,19 +101,17 @@ export default function Home({ route, navigation }) {
                     </Text>
                 }
 
-
                 <TouchableHighlight
                     style={styles.button}
-                    onPress={registerToList}
+                    onPress={signUpToLogin}
                 >
-                    <Text style={styles.buttonText}>M'identifier</Text>
+                    <Text style={styles.buttonText}>M'inscrire</Text>
                 </TouchableHighlight>
 
-                <Text style={styles.signUpLink}
-                    onPress={() => navigation.navigate('SignUp')}>
-                    M'inscrire
+                <Text style={styles.loginLink}
+                    onPress={() => navigation.navigate('Home')}>
+                    M'identifier
                 </Text>
-
 
             </View>
         </SafeAreaView>
@@ -170,7 +175,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         fontSize: 16,
     },
-    signUpLink: {
+    loginLink: {
         marginTop: 40,
         color: '#ff0016',
         textAlign: 'center',

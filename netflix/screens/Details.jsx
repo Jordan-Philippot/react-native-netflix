@@ -1,40 +1,93 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, Image, ActivityIndicator, TouchableHighlight, FlatList } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View, Image, ActivityIndicator, FlatList, Animated } from 'react-native';
+
+// Packages
 import { vw, vh } from 'react-native-expo-viewport-units';
-import {
-    useFonts,
-    BebasNeue_400Regular,
-} from "@expo-google-fonts/dev";
-
-// import Icon from 'react-native-vector-icons/dist/FontAwesome';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const myIcon = <Icon name="rocket" size={30} color="#900" />;
-import { getShowById } from '../services/axios';
+// Services
+import {
+    getShowById,
+    getCharactersByShow,
+    getEpisodesByShow,
+    getSeasonsByShow,
+    getVideosByShow
+} from '../services/shows';
+import {
+    getFavorites,
+    addToFavorite,
+    deleteToFavorite,
+    addNote,
+    deleteNote,
+} from '../services/member';
 
+// Component
+import CharacterItem from '../components/CharacterItem'
+import EpisodeItem from '../components/EpisodeItem'
+
+// Images
 import NetflixNLogo from '../assets/images/netflixNLogo.png'
 import NetflixNLogoTransparent from '../assets/images/netflixNLogoTransparent.png'
 
-export default function Details({ route, navigation }) {
-    const [show, setShow] = useState([])
 
-    let [fontsLoaded] = useFonts({
-        BebasNeue_400Regular
-    });
+export default function Details({ route, navigation }) {
+    const [error, setError] = useState("")
+    const [show, setShow] = useState([])
+    const [characters, setCharacters] = useState([])
+    const [tokenStorage, setTokenStorage] = useState("")
+    const [idMember, setIdMember] = useState("")
+    const [myFavorites, setMyFavorites] = useState([])
+    const [favoriteResponse, setFavoriteResponse] = useState([])
+    const [episodesByShow, setEpisodesByShow] = useState([])
+    const [seasonsByShow, setSeasonsByShow] = useState([])
+    const [videosByShow, setVideosByShow] = useState([])
 
     const { id } = route.params;
 
+    /* Filter shows by season */
+    const getEpisodesBySeason = (episodes, season) => {
+        return episodes.filter(episode => episode.season == season)
+    }
+
     useEffect(() => {
-        if (typeof id !== "undefined") {
-            getShowById(setShow, id)
+        const fetchStorage = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                const memberId = await AsyncStorage.getItem('id');
+
+                setTokenStorage(token)
+                setIdMember(memberId)
+
+                getShowById(setShow, id)
+                getCharactersByShow(setCharacters, id)
+                getFavorites(setMyFavorites, memberId, token)
+                getEpisodesByShow(setEpisodesByShow, id)
+                getSeasonsByShow(setSeasonsByShow, id)
+                getVideosByShow(setVideosByShow, id)
+            } catch (e) {
+                setError(e)
+            }
         }
-    }, [id])
 
-    const openInNewTab = url => {
-        window.open(url, '_blank', 'noopener,noreferrer');
-    };
+        fetchStorage()
 
-    console.log(show)
+
+    }, [])
+
+
+    const scrollX = React.useRef(new Animated.Value(0)).current
+
+    // -------------  Actions function ----------------
+    // const addToFavoriteAction = () => {
+    //     addToFavorite(setFavoriteResponse, id, tokenStorage)
+    //     getFavorites(setMyFavorites, idMember, tokenStorage)
+    // }
+
+    // jordan.philippot.pro@gmail.com
+
+
+    console.log(myFavorites, episodesByShow, videosByShow)
     return (
         <SafeAreaView>
             <View style={styles.container}>
@@ -62,6 +115,38 @@ export default function Details({ route, navigation }) {
                         <View>
                             <Text style={styles.title}>{show.title ? show.title : show.original_title ? show.original_title : "Sans Titre"}</Text>
                         </View>
+
+                        {/* Actions on this show  */}
+                        <View style={styles.actions}>
+                            {/* Mean for this show  */}
+                            <View style={styles.actionsIcon}>
+                                <Icon
+                                    name='heart'
+                                    color='#ff0016'
+                                    size={26}
+                                // onPress={addToFavoriteAction}
+                                />
+                            </View>
+                            <View style={styles.actionsIcon}>
+                                <Icon
+                                    name='archive'
+                                    color='#ff0016'
+                                    size={26}
+                                // onPress={addToArchiveAction}
+                                />
+                            </View>
+                            <View style={styles.actionsIcon}>
+                                <Icon
+                                    name='star-half-empty'
+                                    color='#ff0016'
+                                    size={26}
+                                // onPress={addToArchiveAction}
+                                />
+                            </View>
+
+
+                        </View>
+
                         {/* Release year and number of seasons  */}
                         <View style={styles.detailsRelease}>
                             {/* Mean for this show  */}
@@ -92,7 +177,60 @@ export default function Details({ route, navigation }) {
                         </View>
 
 
-                        {/* https://www.betaseries.com/link/23963/1/fr */}
+                        {/* Actors */}
+                        <View style={{ flex: 1 }}>
+                            <FlatList
+                                horizontal={true}
+                                data={characters}
+                                style={styles.list}
+                                ItemSeparatorComponent={Separator}
+                                decelerationRate={"normal"}
+                                ListEmptyComponent={listEmptyComponent}
+                                onScroll={Animated.event(
+                                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                                    { useNativeDriver: false }
+                                )}
+                                contentContainerStyle={{
+                                    flexGrow: 1,
+                                }}
+                                showsHorizontalScrollIndicator={false}
+                                keyExtractor={item => item.person_id}
+                                renderItem={({ item }) => (
+                                    <View>
+                                        <CharacterItem character={item} navigation={navigation} />
+                                    </View>
+                                )}
+                            />
+                        </View>
+
+
+                        {/* Episodes by Seasons */}
+                        {seasonsByShow.map(season =>
+                            <View>
+                                <Text style={styles.seasonNumber}>Saison {season.number} </Text>
+                                <FlatList
+                                    horizontal={true}
+                                    data={getEpisodesBySeason(episodesByShow, season.number)}
+                                    style={styles.list}
+                                    ItemSeparatorComponent={Separator}
+                                    decelerationRate={"normal"}
+                                    ListEmptyComponent={episodesEmptyComponent}
+                                    onScroll={Animated.event(
+                                        [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                                        { useNativeDriver: false }
+                                    )}
+                                    showsHorizontalScrollIndicator={true}
+                                    keyExtractor={item => item.id}
+                                    renderItem={({ item }) => (
+                                        <View>
+                                            <EpisodeItem episode={item} navigation={navigation} />
+                                        </View>
+                                    )}
+                                />
+                            </View>
+                        )}
+
+
 
                         {/* Back to the list */}
                         <View
@@ -114,7 +252,39 @@ export default function Details({ route, navigation }) {
                     <ActivityIndicator style={styles.loader} size="large" color="#ff0016" />
                 }
             </View>
-        </SafeAreaView>
+        </SafeAreaView >
+    );
+}
+
+
+const Separator = () => {
+    return (
+        <View
+            style={{
+                height: vw(33),
+                width: 5,
+                backgroundColor: "black",
+            }}
+        />
+    );
+}
+
+const listEmptyComponent = () => {
+    return (
+        <View
+            style={styles.charactersEmpty}
+        >
+            <Text style={styles.textCharactersEmpty}>Aucune acteur n'a été trouvée</Text>
+        </View>
+    );
+}
+const episodesEmptyComponent = () => {
+    return (
+        <View
+            style={styles.charactersEmpty}
+        >
+            <Text style={styles.textCharactersEmpty}>Aucun épisode n'a été trouvée</Text>
+        </View>
     );
 }
 
@@ -124,7 +294,6 @@ const styles = StyleSheet.create({
         minHeight: vh(93),
     },
     containerCondition: {
-        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -137,11 +306,11 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         marginLeft: vw(15),
         marginRight: 'auto',
+        marginTop: 40,
         color: "white",
         fontSize: 16,
         marginBottom: 25,
         fontWeight: 'bold',
-        fontFamily: BebasNeue_400Regular,
     },
     title: {
         color: "#fff",
@@ -152,13 +321,12 @@ const styles = StyleSheet.create({
         width: '100%',
         maxWidth: vw(70),
         fontWeight: 'bold',
-        fontFamily: BebasNeue_400Regular,
         flexWrap: 'break-word',
         textAlign: 'center',
     },
     image: {
         width: vw(70),
-        height: vw(70),
+        height: 'auto',
         borderRadius: 5,
     },
     network: {
@@ -174,7 +342,6 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         textTransform: 'uppercase',
         color: "#bababa",
-        fontFamily: BebasNeue_400Regular,
         marginTop: 'auto',
         marginBottom: 'auto',
         fontSize: 10,
@@ -184,10 +351,17 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 15
     },
+    actions: {
+        flexDirection: 'row',
+        marginBottom: 15
+    },
+    actionsIcon: {
+        marginRight: 25,
+        marrginLeft: 25,
+    },
     creation: {
         color: "white",
         fontSize: 12,
-
     },
     seasons: {
         color: "white",
@@ -207,14 +381,12 @@ const styles = StyleSheet.create({
     notes: {
         flexDirection: 'row',
         marginRight: 10,
-
     },
     notesMean: {
         textAlign: "left",
         color: "#fff",
         fontSize: 12,
         marginLeft: 5,
-        fontFamily: BebasNeue_400Regular,
         marginTop: 'auto',
         marginBottom: 'auto',
     },
@@ -239,7 +411,6 @@ const styles = StyleSheet.create({
         marginLeft: 15,
         textAlign: "left",
         fontWeight: 'bold',
-        fontFamily: BebasNeue_400Regular,
     },
     button: {
         flexDirection: 'row',
@@ -252,11 +423,32 @@ const styles = StyleSheet.create({
         color: "#ff0016",
         marginLeft: 10,
         fontWeight: 'bold',
-        fontFamily: BebasNeue_400Regular,
         marginTop: 'auto',
         marginBottom: 'auto',
         fontSize: 12,
     },
-    firstEpisod: {
+    charactersEmpty: {
+        height: vw(33),
+        width: vw(33),
+        backgroundColor: "white",
+    },
+    textCharactersEmpty: {
+        color: "#ff0016",
+        marginTop: "auto",
+        marginBottom: "auto",
+        textAlign: "center",
+        fontWeight: "bold",
+        fontSize: 12,
+    },
+    list: {
+        maxWidth: vw(100),
+        marginTop: 40,
+    },
+    seasonNumber: {
+        color: "#fff",
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginTop: 40,
+        marginLeft: 15,
     }
 });

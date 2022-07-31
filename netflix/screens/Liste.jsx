@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, FlatList, StyleSheet, Text, View, Animated, ActivityIndicator } from 'react-native';
+import { SafeAreaView, FlatList, StyleSheet, Text, View, Animated, ActivityIndicator, TextInput, TouchableHighlight } from 'react-native';
+
+// Package
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { vw, vh } from 'react-native-expo-viewport-units';
-import {
-    useFonts,
-    BebasNeue_400Regular,
-} from "@expo-google-fonts/dev";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-import { getShows, getGenres } from '../services/axios';
-import ShowItem from './ShowItem'
 
+// Services
+import { getShows, getGenres } from '../services/shows';
+
+// Images
+import ShowItem from '../components/ShowItem'
 
 
 export default function Liste({ route, navigation }) {
@@ -19,10 +21,7 @@ export default function Liste({ route, navigation }) {
     const [shows, setShows] = useState([])
     const [genres, setGenres] = useState([])
 
-
-    let [fontsLoaded] = useFonts({
-        BebasNeue_400Regular
-    });
+    const { signup } = route.params ? route.params : "undefined";
 
     /* Filter shows by category */
     const getShowsByCategory = (shows, category) => {
@@ -33,21 +32,22 @@ export default function Liste({ route, navigation }) {
     useEffect(() => {
         const fetchStorage = async () => {
             try {
-                const data = await AsyncStorage.getItem('name');
+                const data = await AsyncStorage.getItem('login');
                 setNameStorage(data)
+
+                /* Get all category and shows */
+                getGenres(setGenres)
+                setLoading(true)
+                getShows(setShows, setLoading)
             } catch (e) {
                 setError(e)
             }
         }
         fetchStorage()
 
-        /* Get all category and shows */
-        getGenres(setGenres)
-        setLoading(true)
-        getShows(setShows, setLoading)
     }, [])
 
-    const scrollX = React.useRef(new Animated.Value(0)).current
+    const scrollY = React.useRef(new Animated.Value(0)).current
 
     return (
         <SafeAreaView>
@@ -55,29 +55,50 @@ export default function Liste({ route, navigation }) {
             <View style={styles.container}>
                 <Text style={styles.title}>Bonjour {nameStorage && nameStorage} !</Text>
 
+                {/* ----- Register success ----- */}
+                {signup === "succes" &&
+                    <Text style={styles.signupSuccess}>
+                        Votre inscription à bien été pris en compte, merci de vérifier votre adresse mail
+                    </Text>
+                }
+
+                {/* ----- Search By Title ----- */}
+                <View>
+                    <TouchableHighlight
+                        style={styles.button}
+                        onPress={() => navigation.navigate('Search')}
+                    >
+                        <Icon
+                            name='search'
+                            color='#fff'
+                            size={26}
+                        />
+                    </TouchableHighlight>
+                </View>
+
+                {/* ----- If Loaded display show by category ----- */}
                 {loading ?
                     <ActivityIndicator style={styles.loader} size="large" color="#ff0016" />
                     :
                     Object.keys(genres).map(key =>
                         <View>
-                            {fontsLoaded ? <Text style={styles.titleCategory}>{genres[key]} :</Text> : <ActivityIndicator style={styles.loader} size="large" color="#fff" />}
+                            <Text style={styles.titleCategory}>{genres[key]} </Text>
                             <FlatList
                                 horizontal={true}
                                 data={getShowsByCategory(shows, key)}
                                 style={styles.list}
                                 ItemSeparatorComponent={Separator}
                                 decelerationRate={"normal"}
-                                // onEndReached={fetchMore}
                                 ListEmptyComponent={listEmptyComponent}
                                 onScroll={Animated.event(
-                                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
                                     { useNativeDriver: false }
                                 )}
                                 showsHorizontalScrollIndicator={false}
-                                keyExtractor={item => item.id + item.thetvdb_id + item.themoviedb_id + genres[key]}
+                                keyExtractor={item => item.thetvdb_id}
                                 renderItem={({ item }) => (
                                     <View>
-                                        <ShowItem data={item} navigation={navigation} />
+                                        <ShowItem show={item} navigation={navigation} />
                                     </View>
                                 )}
                             />
@@ -112,14 +133,12 @@ const Separator = () => {
 }
 
 const listEmptyComponent = () => {
-    let [fontsLoaded] = useFonts({
-        BebasNeue_400Regular
-    });
+
     return (
         <View
             style={styles.categoryEmpty}
         >
-            <Text style={styles.textCategoryEmpty}>{fontsLoaded ? "Aucune série n'a été trouvée" : <ActivityIndicator style={styles.loader} size="large" color="#ff0016" />}</Text>
+            <Text style={styles.textCategoryEmpty}>Aucune série n'a été trouvée</Text>
         </View>
     );
 }
@@ -138,6 +157,18 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
+    button: {
+        padding: 10,
+        backgroundColor: '#ff0016',
+        borderRadius: 50,
+        borderWidth: 1,
+        marginTop: 25,
+        marginBottom: 25,
+        width: 50,
+        marginLeft: vw(10),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     titleCategory: {
         fontSize: 16,
         fontWeight: 'bold',
@@ -145,7 +176,6 @@ const styles = StyleSheet.create({
         marginTop: 20,
         marginBottom: 20,
         marginLeft: 10,
-        fontFamily: BebasNeue_400Regular,
     },
     categoryEmpty: {
         height: vw(33),
@@ -159,12 +189,10 @@ const styles = StyleSheet.create({
         textAlign: "center",
         fontWeight: "bold",
         fontSize: 12,
-        fontFamily: BebasNeue_400Regular,
     },
     error: {
         color: "#ff0016",
         marginBottom: 25,
-        fontFamily: BebasNeue_400Regular,
         fontSize: 12,
     },
     item: {
@@ -177,6 +205,12 @@ const styles = StyleSheet.create({
         left: vw(47)
     },
     list: {
-        minHeight: vw(40)
-    }
+        minHeight: vw(40),
+    },
+    signupSuccess: {
+        color: "green",
+        marginBottom: 15,
+        fontSize: 10,
+        fontWeight: "bold",
+    },
 });
