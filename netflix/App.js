@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+// import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import HomeScreen from './screens/Home.jsx'
@@ -20,7 +20,11 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator initialRouteName={"Liste"} >
+      <Tab.Navigator initialRouteName={"Liste"}
+        activeColor="#f0edf6"
+        inactiveColor="#3e2465"
+        barStyle={{ backgroundColor: '#694fad' }}
+         >
         <Tab.Screen name="Home" component={HomeScreen}
           options={{
             title: 'Netflix',

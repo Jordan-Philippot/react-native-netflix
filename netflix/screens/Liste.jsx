@@ -150,7 +150,8 @@ const listEmptyComponent = () => {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 1,
+        // overflow: 'scroll',
         backgroundColor: '#000',
         minHeight: vh(93),
     },
