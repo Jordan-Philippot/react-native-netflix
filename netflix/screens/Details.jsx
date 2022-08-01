@@ -87,7 +87,7 @@ export default function Details({ route, navigation }) {
     // jordan.philippot.pro@gmail.com
 
 
-    console.log(myFavorites, episodesByShow, videosByShow)
+    console.log(myFavorites, episodesByShow, show)
     return (
         <SafeAreaView>
             <View style={styles.container}>
@@ -99,7 +99,7 @@ export default function Details({ route, navigation }) {
 
                         {/* Preview image  */}
                         <Image
-                            source={show.images.show ? show.images.show : NetflixNLogo}
+                            source={show.images.poster ? show.images.poster : show.images.show ? show.images.show : NetflixNLogo}
                             style={styles.image}
                         />
                         {/* Network type with logo 'N' */}
@@ -113,7 +113,7 @@ export default function Details({ route, navigation }) {
 
                         {/* Title */}
                         <View>
-                            <Text style={styles.title}>{show.title ? show.title : show.original_title ? show.original_title : "Sans Titre"}</Text>
+                            <Text style={styles.title}>{show.title ? show.title : show.original_title ? show.original_title : show.slug ? show.slug : "Sans Titre"}</Text>
                         </View>
 
                         {/* Actions on this show  */}
@@ -262,7 +262,7 @@ const Separator = () => {
         <View
             style={{
                 height: vw(33),
-                width: 5,
+                width: 10,
                 backgroundColor: "black",
             }}
         />
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     },
     image: {
         width: vw(70),
-        height: 'auto',
+        height: vw(100),
         borderRadius: 5,
     },
     network: {

@@ -86,7 +86,7 @@ export default function Liste({ route, navigation }) {
             >
                 <Text style={styles.textCategoryEmpty}>Désolé, Aucun résultat n'a été trouvé</Text>
             </View>
-        } else {
+        } else if(discoverShows.length > 0) {
             return <View style={styles.containerList}>
                 <Text style={styles.title}>Vous aimerez peut être</Text>
                 <FlatList
@@ -109,6 +109,12 @@ export default function Liste({ route, navigation }) {
                         </View>
                     )}
                 />
+            </View>
+        }else{
+            <View
+                style={styles.categoryEmpty}
+            >
+                <Text style={styles.textCategoryEmpty}>Désolé, un problème est survenu</Text>
             </View>
         }
 

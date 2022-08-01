@@ -49,6 +49,8 @@ export default function Liste({ route, navigation }) {
 
     const scrollY = React.useRef(new Animated.Value(0)).current
 
+    console.log(shows)
+
     return (
         <SafeAreaView>
 
@@ -65,14 +67,17 @@ export default function Liste({ route, navigation }) {
                 {/* ----- Search By Title ----- */}
                 <View>
                     <TouchableHighlight
-                        style={styles.button}
+                        style={styles.buttonContainer}
                         onPress={() => navigation.navigate('Search')}
                     >
-                        <Icon
-                            name='search'
-                            color='#fff'
-                            size={26}
-                        />
+                        <View style={styles.button}>
+                            <Icon
+                                name='search'
+                                color='#fff'
+                                size={26}
+                            />
+                            <Text style={styles.buttonText}>Rechercher</Text>
+                        </View>
                     </TouchableHighlight>
                 </View>
 
@@ -125,7 +130,7 @@ const Separator = () => {
         <View
             style={{
                 height: vw(33),
-                width: 5,
+                width: 10,
                 backgroundColor: "black",
             }}
         />
@@ -157,17 +162,28 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
-    button: {
+    buttonContainer: {
         padding: 10,
         backgroundColor: '#ff0016',
-        borderRadius: 50,
+        borderRadius: 25,
         borderWidth: 1,
         marginTop: 25,
         marginBottom: 25,
-        width: 50,
+        width: 180,
         marginLeft: vw(10),
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    button: {
+        flexDirection: 'row',
+    },
+    buttonText: {
+        color: 'white',
+        marginTop: 3,
+        // marginBottom: 'auto',
+        fontWeight: 'bold',
+        fontSize: 18,
+        marginLeft: 10,
     },
     titleCategory: {
         fontSize: 16,

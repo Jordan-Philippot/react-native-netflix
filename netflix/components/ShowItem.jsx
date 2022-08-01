@@ -13,7 +13,7 @@ export default function ShowItem({ show, navigation }) {
         <SafeAreaView>
             <View style={styles.container}>
                 <Image
-                    source={show.images.show ? show.images.show : NetflixNLogo}
+                    source={show.images.poster ? show.images.poster : show.images.show ? show.images.show : NetflixNLogo}
                     style={styles.image}
                 />
                 <Text style={styles.title}
@@ -21,7 +21,7 @@ export default function ShowItem({ show, navigation }) {
                         id: show.id,
                     })}
                 >
-                    {show.title ? show.title : show.original_title ? show.original_title : "Sans Titre"}
+                    {show.title ? show.title : show.original_title ? show.original_title : show.slug ? show.slug  : "Sans Titre"}
                 </Text>
             </View>
         </SafeAreaView>
@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
         flexWrap: 'break-word',
     },
     image: {
-        width: vw(33),
-        height: vw(33),
+        width: vw(35),
+        height: vw(50),
         borderRadius: 5,
     },
 });
