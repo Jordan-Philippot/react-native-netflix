@@ -5,10 +5,6 @@ import { SafeAreaView, Text, TextInput, View, TouchableHighlight, Image, StyleSh
 import { vw, vh } from 'react-native-expo-viewport-units';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { stringMd5 } from 'react-native-quick-md5';
-// import {
-//     useFonts,
-//     BebasNeue_400Regular,
-// } from "@expo-google-fonts/dev";
 
 // Images
 import NetflixLogo from '../assets/images/netflixLogo.png'

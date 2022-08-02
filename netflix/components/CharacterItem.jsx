@@ -4,7 +4,6 @@ import { SafeAreaView, StyleSheet, Text, View, Image } from 'react-native';
 // Packages
 import { vw, vh } from 'react-native-expo-viewport-units';
 
-
 // Images
 import NetflixNLogo from '../assets/images/netflixNLogo.png'
 

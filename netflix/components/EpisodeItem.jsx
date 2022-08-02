@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, Text, View, Image } from 'react-native';
 
 // Packages
-import { vw, vh } from 'react-native-expo-viewport-units';
+import { vw } from 'react-native-expo-viewport-units';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 // Images

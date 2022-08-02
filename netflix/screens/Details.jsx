@@ -12,12 +12,9 @@ import {
     getCharactersByShow,
     getEpisodesByShow,
     getSeasonsByShow,
-    getVideosByShow
 } from '../services/shows';
 import {
     getFavorites,
-    addToFavorite,
-    deleteToFavorite,
     addNote,
     deleteNote,
 } from '../services/member';
@@ -25,6 +22,8 @@ import {
 // Component
 import CharacterItem from '../components/CharacterItem'
 import EpisodeItem from '../components/EpisodeItem'
+import TabBottom from '../components/TabBottom'
+
 
 // Images
 import NetflixNLogo from '../assets/images/netflixNLogo.png'
@@ -35,17 +34,13 @@ export default function Details({ route, navigation }) {
     const [error, setError] = useState("")
     const [show, setShow] = useState([])
     const [characters, setCharacters] = useState([])
-    const [tokenStorage, setTokenStorage] = useState("")
-    const [idMember, setIdMember] = useState("")
     const [myFavorites, setMyFavorites] = useState([])
-    const [favoriteResponse, setFavoriteResponse] = useState([])
     const [episodesByShow, setEpisodesByShow] = useState([])
     const [seasonsByShow, setSeasonsByShow] = useState([])
-    const [videosByShow, setVideosByShow] = useState([])
 
     const { id } = route.params;
 
-    /* Filter shows by season */
+    /* ----- Filter shows by season ----- */
     const getEpisodesBySeason = (episodes, season) => {
         return episodes.filter(episode => episode.season == season)
     }
@@ -56,15 +51,11 @@ export default function Details({ route, navigation }) {
                 const token = await AsyncStorage.getItem('token');
                 const memberId = await AsyncStorage.getItem('id');
 
-                setTokenStorage(token)
-                setIdMember(memberId)
-
                 getShowById(setShow, id)
                 getCharactersByShow(setCharacters, id)
                 getFavorites(setMyFavorites, memberId, token)
                 getEpisodesByShow(setEpisodesByShow, id)
                 getSeasonsByShow(setSeasonsByShow, id)
-                getVideosByShow(setVideosByShow, id)
             } catch (e) {
                 setError(e)
             }
@@ -87,22 +78,26 @@ export default function Details({ route, navigation }) {
     // jordan.philippot.pro@gmail.com
 
 
-    console.log(myFavorites, episodesByShow, show)
+    // console.log(myFavorites, episodesByShow, show)
+
     return (
         <SafeAreaView>
             <View style={styles.container}>
+
+                {/* ----- Tab Bar bottom -----*/}
+                <TabBottom route={route} navigation={navigation}/>
 
                 {typeof show.id !== "undefined" ?
                     <View style={styles.containerCondition}>
 
                         <Text style={styles.presentation}>Votre Série :</Text>
 
-                        {/* Preview image  */}
+                        {/* ----- Preview image ----- */}
                         <Image
                             source={show.images.poster ? show.images.poster : show.images.show ? show.images.show : NetflixNLogo}
                             style={styles.image}
                         />
-                        {/* Network type with logo 'N' */}
+                        {/* ----- Network type with logo 'N' ----- */}
                         <View style={styles.network}>
                             <Image
                                 source={NetflixNLogoTransparent}
@@ -116,9 +111,9 @@ export default function Details({ route, navigation }) {
                             <Text style={styles.title}>{show.title ? show.title : show.original_title ? show.original_title : show.slug ? show.slug : "Sans Titre"}</Text>
                         </View>
 
-                        {/* Actions on this show  */}
+                        {/* ----- Actions on this show ----- */}
                         <View style={styles.actions}>
-                            {/* Mean for this show  */}
+                            {/* ----- Mean for this show ----- */}
                             <View style={styles.actionsIcon}>
                                 <Icon
                                     name='heart'
@@ -147,9 +142,9 @@ export default function Details({ route, navigation }) {
 
                         </View>
 
-                        {/* Release year and number of seasons  */}
+                        {/* ----- Release year and number of seasons ----- */}
                         <View style={styles.detailsRelease}>
-                            {/* Mean for this show  */}
+                            {/* ----- Mean for this show ----- */}
                             <View style={styles.notes}>
                                 <Icon
                                     name='star'
@@ -164,12 +159,12 @@ export default function Details({ route, navigation }) {
 
 
 
-                        {/* Description */}
+                        {/* ----- Description ----- */}
                         <View>
                             <Text style={styles.description}>{show.description ? show.description : "Aucune description"}</Text>
                         </View>
 
-                        {/* Genres */}
+                        {/* ----- Genres ----- */}
                         <View style={styles.allGenres}>
                             {Object.keys(show.genres).map(key =>
                                 <Text style={styles.genres}>{show.genres[key]}</Text>
@@ -177,7 +172,7 @@ export default function Details({ route, navigation }) {
                         </View>
 
 
-                        {/* Actors */}
+                        {/* ----- Actors ----- */}
                         <View style={{ flex: 1 }}>
                             <FlatList
                                 horizontal={true}
@@ -204,7 +199,7 @@ export default function Details({ route, navigation }) {
                         </View>
 
 
-                        {/* Episodes by Seasons */}
+                        {/* ----- Episodes by Seasons ----- */}
                         {seasonsByShow.map(season =>
                             <View>
                                 <Text style={styles.seasonNumber}>Saison {season.number} </Text>
@@ -219,7 +214,7 @@ export default function Details({ route, navigation }) {
                                         [{ nativeEvent: { contentOffset: { x: scrollX } } }],
                                         { useNativeDriver: false }
                                     )}
-                                    showsHorizontalScrollIndicator={true}
+                                    showsHorizontalScrollIndicator={false}
                                     keyExtractor={item => item.id}
                                     renderItem={({ item }) => (
                                         <View>
@@ -232,7 +227,7 @@ export default function Details({ route, navigation }) {
 
 
 
-                        {/* Back to the list */}
+                        {/* ----- Back to the list ----- */}
                         <View
                             style={styles.button}
                         >
@@ -428,9 +423,10 @@ const styles = StyleSheet.create({
         fontSize: 12,
     },
     charactersEmpty: {
-        height: vw(33),
+        height: vw(50),
         width: vw(33),
         backgroundColor: "white",
+        borderRadius: 5,
     },
     textCharactersEmpty: {
         color: "#ff0016",

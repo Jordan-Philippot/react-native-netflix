@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, FlatList, StyleSheet, Text, View, Animated, ActivityIndicator, TextInput, TouchableHighlight } from 'react-native';
+import { SafeAreaView, FlatList, StyleSheet, Text, View, Animated, ActivityIndicator, TouchableHighlight } from 'react-native';
 
 // Package
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { vw, vh } from 'react-native-expo-viewport-units';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-
 // Services
 import { getShows, getGenres } from '../services/shows';
 
-// Images
+// Component
 import ShowItem from '../components/ShowItem'
+import TabBottom from '../components/TabBottom'
 
 
 export default function Liste({ route, navigation }) {
@@ -23,19 +23,19 @@ export default function Liste({ route, navigation }) {
 
     const { signup } = route.params ? route.params : "undefined";
 
-    /* Filter shows by category */
+    /* ----- Filter shows by category ----- */
     const getShowsByCategory = (shows, category) => {
         return shows.filter(show => Object.keys(show?.genres).includes(category))
     }
 
-    /* Get the name in localStorage & get Shows */
+    /* ----- Get the name in localStorage & get Shows ----- */
     useEffect(() => {
         const fetchStorage = async () => {
             try {
                 const data = await AsyncStorage.getItem('login');
                 setNameStorage(data)
 
-                /* Get all category and shows */
+                /* ----- Get all category and shows ----- */
                 getGenres(setGenres)
                 setLoading(true)
                 getShows(setShows, setLoading)
@@ -50,11 +50,17 @@ export default function Liste({ route, navigation }) {
     const scrollY = React.useRef(new Animated.Value(0)).current
 
     console.log(shows)
+   
 
     return (
         <SafeAreaView>
 
             <View style={styles.container}>
+
+
+               {/* ----- Tab Bar bottom -----*/}
+               <TabBottom route={route} navigation={navigation}/>
+
                 <Text style={styles.title}>Bonjour {nameStorage && nameStorage} !</Text>
 
                 {/* ----- Register success ----- */}
@@ -143,25 +149,28 @@ const listEmptyComponent = () => {
         <View
             style={styles.categoryEmpty}
         >
-            <Text style={styles.textCategoryEmpty}>Aucune série n'a été trouvée</Text>
+            <Text style={styles.textCategoryEmpty}>Aucun résultat</Text>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        // flex: 1,
-        // overflow: 'scroll',
         backgroundColor: '#000',
         minHeight: vh(93),
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: "white",
+        color: "#ff0016",
         marginTop: 40,
         marginBottom: 20,
         textAlign: 'center',
+        backgroundColor: "white",
+        borderRadius: 30,
+        padding: 10,
+        width: vw(60),
+        marginLeft: vw(20)
     },
     buttonContainer: {
         padding: 10,
@@ -181,7 +190,6 @@ const styles = StyleSheet.create({
     buttonText: {
         color: 'white',
         marginTop: 3,
-        // marginBottom: 'auto',
         fontWeight: 'bold',
         fontSize: 18,
         marginLeft: 10,
@@ -195,9 +203,13 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
     categoryEmpty: {
-        height: vw(33),
+        height: vw(50),
         width: vw(33),
         backgroundColor: "white",
+        borderRadius: 5,
+        paddingLeft: 5,
+        paddingRight: 5,
+        marginBottom: 30,
     },
     textCategoryEmpty: {
         color: "#ff0016",
@@ -205,7 +217,8 @@ const styles = StyleSheet.create({
         marginBottom: "auto",
         textAlign: "center",
         fontWeight: "bold",
-        fontSize: 12,
+        fontSize: 18,
+        lineHeight: 25,
     },
     error: {
         color: "#ff0016",

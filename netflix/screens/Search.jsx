@@ -9,8 +9,9 @@ import { vw, vh } from 'react-native-expo-viewport-units';
 // Services
 import { searchShowsByTitle, getDiscoverShow } from '../services/shows';
 
-// Images
+// Component
 import ShowItem from '../components/ShowItem'
+import TabBottom from '../components/TabBottom'
 
 
 export default function Liste({ route, navigation }) {
@@ -23,7 +24,7 @@ export default function Liste({ route, navigation }) {
     const [isLoadingForSearch, setIsLoadingForSearch] = useState(false)
     const [haveSearch, setHaveSearch] = useState(false)
 
-    /* Get the name in localStorage & get Shows */
+    /* ----- Get the name in localStorage & get Shows ----- */
     useEffect(() => {
         const fetchStorage = async () => {
             try {
@@ -86,7 +87,7 @@ export default function Liste({ route, navigation }) {
             >
                 <Text style={styles.textCategoryEmpty}>Désolé, Aucun résultat n'a été trouvé</Text>
             </View>
-        } else if(discoverShows.length > 0) {
+        } else if (discoverShows.length > 0) {
             return <View style={styles.containerList}>
                 <Text style={styles.title}>Vous aimerez peut être</Text>
                 <FlatList
@@ -110,7 +111,7 @@ export default function Liste({ route, navigation }) {
                     )}
                 />
             </View>
-        }else{
+        } else {
             <View
                 style={styles.categoryEmpty}
             >
@@ -125,6 +126,11 @@ export default function Liste({ route, navigation }) {
         <SafeAreaView>
 
             <View style={styles.container}>
+
+
+                {/* ----- Tab Bar bottom -----*/}
+                <TabBottom route={route} navigation={navigation}/>
+
 
                 {/* ----- Search By Title ----- */}
                 <View style={styles.searchComponent}>
@@ -145,7 +151,6 @@ export default function Liste({ route, navigation }) {
 
                 {/* ----- If Loaded display show by category ----- */}
                 {whatImLoaded()}
-
 
 
                 {

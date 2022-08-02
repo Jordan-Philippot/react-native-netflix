@@ -7,6 +7,7 @@ import { vw, vh } from 'react-native-expo-viewport-units';
 // Images
 import NetflixNLogo from '../assets/images/netflixNLogo.png'
 
+
 export default function ShowItem({ show, navigation }) {
 
     return (
